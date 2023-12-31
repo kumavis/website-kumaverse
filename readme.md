@@ -1,29 +1,8 @@
-# henryheffernan.com
+# kumavis.me
 
-This is one of two repositories created for my portfolio website <a href="https://henryheffernan.com/"><samp>henryheffernan.com</samp></a>. If you are looking for the 2D OS repository you can find it <a href="https://github.com/henryjeff/portfolio-inner-site"><samp>here</samp></a>! Thanks for taking the time to check this out. If you have any questions of comments, feel free to shoot me an email at <samp><a href="mailto:henryheffernan@gmail.com">henryheffernan@gmail.com</a></samp> or you can DM me on twitter <a href="https://twitter.com/henryheffernan"><samp>@henryheffernan</samp></a>.
+This is a component of [my personal website](https://kumavis.me).
+This is the 3D scene that forms the outer layer of the website.
 
-<br>
+It is based on the [personal portfolio site](https://github.com/henryjeff/portfolio-website) of [https://twitter.com/henryheffernan](henry heffernan).
 
-To setup a dev environment:
-
-```bash
-# Clone the repository
-
-# Install dependencies 
-npm i
-
-# Run the local dev server
-npm run dev
-```
-
-To serve a production build:
-
-```bash
-# Install dependencies if not already done - 'npi i'
-
-# Build for production
-npm run build
-
-# Serve the build using express
-npm start
-```
+My primary contribution is on [the operating system](https://github.com/kumavis/kumavOS).
