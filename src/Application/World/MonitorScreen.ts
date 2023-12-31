@@ -184,7 +184,7 @@ export default class MonitorScreen extends EventEmitter {
 
         // Set iframe attributes
         // PROD
-        iframe.src = 'https://kumavis.github.io/kumavisOS/';
+        iframe.src = 'https://kumavis.github.io/kumavOS/';
         /**
          * Use dev server is query params are present
          *
@@ -204,7 +204,7 @@ export default class MonitorScreen extends EventEmitter {
         iframe.className = 'jitter';
         iframe.id = 'computer-screen';
         iframe.frameBorder = '0';
-        iframe.title = 'kumavisOS';
+        iframe.title = 'kumavOS';
 
         // Add iframe to container
         container.appendChild(iframe);

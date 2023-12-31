@@ -8,8 +8,6 @@ const LoadingScreen: React.FC<LoadingProps> = () => {
     const [toLoad, setToLoad] = useState(0);
     const [loaded, setLoaded] = useState(0);
     const [overlayOpacity, setLoadingOverlayOpacity] = useState(1);
-    const [loadingTextOpacity, setLoadingTextOpacity] = useState(1);
-    const [startPopupOpacity, setStartPopupOpacity] = useState(0);
     const [webGLErrorOpacity, setWebGLErrorOpacity] = useState(0);
 
     const [showBiosInfo, setShowBiosInfo] = useState(false);
@@ -18,17 +16,6 @@ const LoadingScreen: React.FC<LoadingProps> = () => {
     const [webGLError, setWebGLError] = useState(false);
     const [counter, setCounter] = useState(0);
     const [resources] = useState<string[]>([]);
-    const [mobileWarning, setMobileWarning] = useState(window.innerWidth < 768);
-
-    const onResize = () => {
-        if (window.innerWidth < 768) {
-            setMobileWarning(true);
-        } else {
-            setMobileWarning(false);
-        }
-    };
-
-    window.addEventListener('resize', onResize);
 
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
@@ -68,10 +55,7 @@ const LoadingScreen: React.FC<LoadingProps> = () => {
             setDoneLoading(true);
 
             setTimeout(() => {
-                setLoadingTextOpacity(0);
-                setTimeout(() => {
-                    setStartPopupOpacity(1);
-                }, 500);
+                start();
             }, 1000);
         }
     }, [progress]);
@@ -131,15 +115,10 @@ const LoadingScreen: React.FC<LoadingProps> = () => {
                 transform: `scale(${overlayOpacity === 0 ? 1.1 : 1})`,
             })}
         >
-            {startPopupOpacity === 0 && loadingTextOpacity === 0 && (
-                <div style={styles.blinkingContainer}>
-                    <span className="blinking-cursor" />
-                </div>
-            )}
             {!webGLError && (
                 <div
                     style={Object.assign({}, styles.overlayText, {
-                        opacity: loadingTextOpacity,
+                        opacity: 1,
                     })}
                 >
                     <div
@@ -149,24 +128,24 @@ const LoadingScreen: React.FC<LoadingProps> = () => {
                         <div style={styles.logoContainer}>
                             <div>
                                 <p style={styles.green}>
-                                    <b>Heffernan,</b>{' '}
+                                    <b>KUMAVERSE</b>{' '}
                                 </p>
                                 <p style={styles.green}>
-                                    <b>Henry Inc.</b>
+                                    <b>Kuma Co.</b>
                                 </p>
                             </div>
                         </div>
                         <div style={styles.headerInfo}>
-                            <p>Released: 01/13/2000</p>
-                            <p>HHBIOS (C)2000 Heffernan Henry Inc.,</p>
+                            <p>Released: 08/28/1986</p>
+                            <p>KuBIOS (c)1986 Kuma Co.</p>
                         </div>
                     </div>
                     <div style={styles.body} className="loading-screen-body">
-                        <p>HSP S13 2000-2022 Special UC131S</p>
+                        <p>KUMA KAG3MUSH4 K69 Nested Sandboxing</p>
                         <div style={styles.spacer} />
                         {showBiosInfo && (
                             <>
-                                <p>HSP Showcase(tm) XX 113</p>
+                                <p>KUMAVERSE(tm) XX 420</p>
                                 <p>Checking RAM : {14000} OK</p>
                                 <div style={styles.spacer} />
                                 <div style={styles.spacer} />
@@ -195,7 +174,7 @@ const LoadingScreen: React.FC<LoadingProps> = () => {
                             <p>
                                 All Content Loaded, launching{' '}
                                 <b style={styles.green}>
-                                    'Henry Heffernan Portfolio Showcase'
+                                    'kumaverse'
                                 </b>{' '}
                                 V1.0
                             </p>
@@ -215,51 +194,6 @@ const LoadingScreen: React.FC<LoadingProps> = () => {
                     </div>
                 </div>
             )}
-            <div
-                style={Object.assign({}, styles.popupContainer, {
-                    opacity: startPopupOpacity,
-                })}
-            >
-                <div style={styles.startPopup}>
-                    {/* <p style={styles.red}>
-                        <b>THIS SITE IS CURRENTLY A W.I.P.</b>
-                    </p>
-                    <p>But do enjoy what I have done so far :)</p>
-                    <div style={styles.spacer} />
-                    <div style={styles.spacer} /> */}
-                    <p>Henry Heffernan Portfolio Showcase 2022</p>
-                    {mobileWarning && (
-                        <>
-                            <br />
-                            <b>
-                                <p style={styles.warning}>
-                                    WARNING: This experience is best viewed on
-                                </p>
-                                <p style={styles.warning}>
-                                    a desktop or laptop computer.
-                                </p>
-                            </b>
-                            <br />
-                        </>
-                    )}
-                    <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-                        <p>Click start to begin{'\xa0'}</p>
-                        <span className="blinking-cursor" />
-                    </div>
-                    <div
-                        style={{
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            marginTop: '16px',
-                        }}
-                    >
-                        <div className="bios-start-button" onClick={start}>
-                            <p>START</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
             {webGLError && (
                 <div
                     style={Object.assign({}, styles.popupContainer, {
