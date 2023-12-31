@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import UIEventBus from '../EventBus';
-import InfoOverlay from './InfoOverlay';
 
 interface InterfaceUIProps {}
 
@@ -63,7 +62,6 @@ const InterfaceUI: React.FC<InterfaceUIProps> = ({}) => {
             className="interface-wrapper"
             id="prevent-click"
         >
-            <InfoOverlay visible={visible} />
         </motion.div>
     ) : (
         <></>

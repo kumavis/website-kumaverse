@@ -76,12 +76,13 @@ export default class Camera extends EventEmitter {
                 this.targetKeyframe === CameraKey.IDLE
             ) {
                 this.transition(CameraKey.DESK);
-            } else if (
-                this.currentKeyframe === CameraKey.DESK ||
-                this.targetKeyframe === CameraKey.DESK
-            ) {
-                this.transition(CameraKey.IDLE);
             }
+            // else if (
+            //     this.currentKeyframe === CameraKey.DESK ||
+            //     this.targetKeyframe === CameraKey.DESK
+            // ) {
+            //     this.transition(CameraKey.IDLE);
+            // }
         });
 
         this.setPostLoadTransition();
@@ -143,10 +144,10 @@ export default class Camera extends EventEmitter {
             );
             UIEventBus.dispatch('enterMonitor', {});
         });
-        this.on('leftMonitor', () => {
-            this.transition(CameraKey.DESK);
-            UIEventBus.dispatch('leftMonitor', {});
-        });
+        // this.on('leftMonitor', () => {
+        //     this.transition(CameraKey.DESK);
+        //     UIEventBus.dispatch('leftMonitor', {});
+        // });
     }
 
     setFreeCamListeners() {
