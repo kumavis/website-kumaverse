@@ -65,18 +65,20 @@ export default class CyberpunkLighting {
 
     createGradientTexture() {
         const size = 256;
-        const data = new Uint8Array(3 * size);
+        const data = new Uint8Array(4 * size);
         for (let i = 0; i < size; i++) {
             const t = i / (size - 1);
             const r = 80 + t * 160;
             const g = 30 + t * 120;
             const b = 120 + t * 80;
-            data[i * 3] = r;
-            data[i * 3 + 1] = g;
-            data[i * 3 + 2] = b;
+            const idx = i * 4;
+            data[idx] = r;
+            data[idx + 1] = g;
+            data[idx + 2] = b;
+            data[idx + 3] = 255;
         }
 
-        const texture = new THREE.DataTexture(data, size, 1, THREE.RGBFormat);
+        const texture = new THREE.DataTexture(data, size, 1, THREE.RGBAFormat);
         texture.needsUpdate = true;
         texture.magFilter = THREE.LinearFilter;
         texture.minFilter = THREE.LinearFilter;
@@ -89,7 +91,9 @@ export default class CyberpunkLighting {
         const pulse = (Math.sin(this.time.elapsed * 0.002) + 1) / 2;
         this.pulseLight.intensity = 4 + pulse * 4;
         if (this.hologramPlane) {
-            this.hologramPlane.material.opacity = 0.18 + pulse * 0.2;
+            const material = this.hologramPlane
+                .material as THREE.MeshBasicMaterial;
+            material.opacity = 0.18 + pulse * 0.2;
         }
     }
 }
