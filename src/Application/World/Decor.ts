@@ -27,6 +27,9 @@ export default class Decor {
     }
 
     setModel() {
-        this.scene.add(this.bakedModel.getModel());
+        const model = this.bakedModel.getModel();
+        model.position.set(240, -20, -260);
+        model.rotation.y = THREE.MathUtils.degToRad(18);
+        this.scene.add(model);
     }
 }

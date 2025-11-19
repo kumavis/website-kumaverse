@@ -30,6 +30,31 @@ const sources: Resource[] = [
         path: 'models/Decor/baked_decor_modified.jpg',
     },
     {
+        name: 'voronFrontSkirtA',
+        type: 'stlModel',
+        path: 'models/Printer/Voron300/front_skirt_a_300.stl',
+    },
+    {
+        name: 'voronFrontSkirtB',
+        type: 'stlModel',
+        path: 'models/Printer/Voron300/front_skirt_b_300.stl',
+    },
+    {
+        name: 'voronRearSkirt',
+        type: 'stlModel',
+        path: 'models/Printer/Voron300/rear_center_skirt_300.stl',
+    },
+    {
+        name: 'voronSideSkirtA',
+        type: 'stlModel',
+        path: 'models/Printer/Voron300/side_skirt_a_300_x2.stl',
+    },
+    {
+        name: 'voronSideSkirtB',
+        type: 'stlModel',
+        path: 'models/Printer/Voron300/side_skirt_b_300_x2.stl',
+    },
+    {
         name: 'monitorSmudgeTexture',
         type: 'texture',
         path: 'textures/monitor/layers/compressed/smudges.jpg',

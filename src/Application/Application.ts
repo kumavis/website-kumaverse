@@ -6,6 +6,7 @@ import Time from './Utils/Time';
 import Camera from './Camera/Camera';
 import Renderer from './Renderer';
 import Mouse from './Utils/Mouse';
+import InteractionManager from './Utils/InteractionManager';
 
 //@ts-ignore
 import World from './World/World';
@@ -35,6 +36,7 @@ export default class Application {
     loading: Loading;
     ui: UI;
     stats: Stats | undefined;
+    interactions: InteractionManager;
 
     constructor() {
         // Singleton
@@ -61,6 +63,7 @@ export default class Application {
         this.camera = new Camera();
         this.renderer = new Renderer();
         this.camera.createControls();
+        this.interactions = new InteractionManager();
         this.world = new World();
 
         this.ui = new UI();

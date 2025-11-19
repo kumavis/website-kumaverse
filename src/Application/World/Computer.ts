@@ -27,6 +27,9 @@ export default class Computer {
     }
 
     setModel() {
-        this.scene.add(this.bakedModel.getModel());
+        const model = this.bakedModel.getModel();
+        model.position.set(-180, -40, 140);
+        model.rotation.y = THREE.MathUtils.degToRad(-12);
+        this.scene.add(model);
     }
 }

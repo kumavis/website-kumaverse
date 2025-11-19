@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
 import Application from '../Application';
 import UIEventBus from '../UI/EventBus';
 import EventEmitter from './EventEmitter';
@@ -12,12 +13,14 @@ export default class Resources extends EventEmitter {
         texture: { [name: string]: LoadedTexture };
         cubeTexture: { [name: string]: LoadedCubeTexture };
         gltfModel: { [name: string]: LoadedModel };
+        stlModel: { [name: string]: LoadedStlModel };
         audio: { [name: string]: LoadedAudio };
     };
     toLoad: number;
     loaded: number;
     loaders: {
         gltfLoader: GLTFLoader;
+        stlLoader: STLLoader;
         textureLoader: THREE.TextureLoader;
         cubeTextureLoader: THREE.CubeTextureLoader;
         audioLoader: THREE.AudioLoader;
@@ -30,7 +33,13 @@ export default class Resources extends EventEmitter {
 
         this.sources = sources;
 
-        this.items = { texture: {}, cubeTexture: {}, gltfModel: {}, audio: {} };
+        this.items = {
+            texture: {},
+            cubeTexture: {},
+            gltfModel: {},
+            stlModel: {},
+            audio: {},
+        };
         this.toLoad = this.sources.length;
         this.loaded = 0;
         this.application = new Application();
@@ -43,6 +52,7 @@ export default class Resources extends EventEmitter {
     setLoaders() {
         this.loaders = {
             gltfLoader: new GLTFLoader(),
+            stlLoader: new STLLoader(),
             textureLoader: new THREE.TextureLoader(),
             cubeTextureLoader: new THREE.CubeTextureLoader(),
             audioLoader: new THREE.AudioLoader(),
@@ -55,6 +65,11 @@ export default class Resources extends EventEmitter {
             if (source.type === 'gltfModel') {
                 this.loaders.gltfLoader.load(source.path, (file) => {
                     this.sourceLoaded(source, file);
+                });
+            } else if (source.type === 'stlModel') {
+                this.loaders.stlLoader.load(source.path, (geometry) => {
+                    geometry.computeVertexNormals();
+                    this.sourceLoaded(source, geometry);
                 });
             } else if (source.type === 'texture') {
                 this.loaders.textureLoader.load(source.path, (file) => {

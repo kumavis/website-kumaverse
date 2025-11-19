@@ -1,11 +1,25 @@
+:root {
+    --cyberpunk-bg: radial-gradient(circle at 20% 20%, #41146b 0%, rgba(4, 2, 14, 0) 35%),
+        radial-gradient(circle at 80% 0%, rgba(0, 197, 255, 0.35) 0%, rgba(0, 197, 255, 0) 40%),
+        linear-gradient(180deg, #04000c 0%, #050111 35%, #020007 100%);
+    --neon-pink: #ff4cf0;
+    --neon-blue: #5ad6ff;
+    --muted-indigo: #847ca3;
+}
+
 * {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
 
 html,
 body {
     overflow: hidden;
+    font-family: 'Space Grotesk', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--cyberpunk-bg);
+    color: #f8f1ff;
+    letter-spacing: 0.03em;
 }
 
 .webgl {
@@ -28,11 +42,18 @@ body {
     width: 100%;
     top: 64px;
     left: 64px;
+    color: var(--neon-blue);
+    text-shadow: 0 0 12px rgba(90, 214, 255, 0.45);
+    backdrop-filter: blur(6px);
+    mix-blend-mode: screen;
 }
 
 .icon-control-container {
     height: 26.5px;
     width: 26.5px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 76, 240, 0.3);
+    box-shadow: 0 0 12px rgba(255, 76, 240, 0.35);
 }
 
 @media only screen and (max-width: 768px) {

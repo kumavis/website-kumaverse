@@ -2,6 +2,7 @@ type Resource =
     | TextureResource
     | CubeTextureResource
     | ModelResource
+    | StlResource
     | AudioResource;
 
 declare interface StyleSheetCSS {
@@ -26,6 +27,12 @@ type ModelResource = {
     path: string;
 };
 
+type StlResource = {
+    name: string;
+    type: 'stlModel';
+    path: string;
+};
+
 type AudioResource = {
     name: string;
     type: 'audio';
@@ -47,14 +54,22 @@ type LoadedResource =
     | LoadedTexture
     | LoadedCubeTexture
     | LoadedModel
+    | LoadedStlModel
     | LoadedAudio;
 
 type LoadedTexture = THREE.Texture;
 
 type LoadedModel = import('three/examples/jsm/loaders/GLTFLoader').GLTF;
 
+type LoadedStlModel = THREE.BufferGeometry;
+
 type LoadedCubeTexture = THREE.CubeTexture;
 
 type LoadedAudio = AudioBuffer;
 
-type ResourceType = 'texture' | 'cubeTexture' | 'gltfModel';
+type ResourceType =
+    | 'texture'
+    | 'cubeTexture'
+    | 'gltfModel'
+    | 'stlModel'
+    | 'audio';

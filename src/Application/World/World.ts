@@ -8,6 +8,8 @@ import CoffeeSteam from './CoffeeSteam';
 import Cursor from './Cursor';
 import Hitboxes from './Hitboxes';
 import AudioManager from '../Audio/AudioManager';
+import Printer from './Printer';
+import CyberpunkLighting from './CyberpunkLighting';
 export default class World {
     application: Application;
     scene: THREE.Scene;
@@ -21,11 +23,14 @@ export default class World {
     coffeeSteam: CoffeeSteam;
     cursor: Cursor;
     audioManager: AudioManager;
+    printer: Printer;
+    cyberpunkLighting: CyberpunkLighting;
 
     constructor() {
         this.application = new Application();
         this.scene = this.application.scene;
         this.resources = this.application.resources;
+        this.cyberpunkLighting = new CyberpunkLighting();
         // Wait for resources
         this.resources.on('ready', () => {
             // Setup
@@ -35,6 +40,7 @@ export default class World {
             this.monitorScreen = new MonitorScreen();
             this.coffeeSteam = new CoffeeSteam();
             this.audioManager = new AudioManager();
+            this.printer = new Printer();
             // const hb = new Hitboxes();
             // this.cursor = new Cursor();
         });
@@ -45,5 +51,7 @@ export default class World {
         if (this.environment) this.environment.update();
         if (this.coffeeSteam) this.coffeeSteam.update();
         if (this.audioManager) this.audioManager.update();
+        if (this.printer) this.printer.update();
+        if (this.cyberpunkLighting) this.cyberpunkLighting.update();
     }
 }
