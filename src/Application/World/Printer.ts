@@ -31,6 +31,9 @@ export default class Printer {
     animationSpeed: number;
     highlightTimeline: number;
     printArea: { width: number; depth: number; height: number };
+    gcodeSegments: GcodeSegment[];
+    gcodeTotalDuration: number;
+    gcodeLoopStart: number;
 
     constructor() {
         this.application = new Application();
@@ -71,6 +74,9 @@ export default class Printer {
         this.animationSpeed = 0.00005;
         this.highlightTimeline = 0;
         this.printArea = { width: 200, depth: 200, height: 180 };
+        this.gcodeSegments = [];
+        this.gcodeTotalDuration = 0;
+        this.gcodeLoopStart = 0;
 
         this.resources.on('ready', () => {
             this.buildPrinter();
@@ -94,6 +100,8 @@ export default class Printer {
         this.group.scale.setScalar(0.45);
         this.group.position.set(520, 460, -300);
         this.group.rotation.y = THREE.MathUtils.degToRad(28);
+
+        this.loadGcodeProgram('gcode/stray-demo.gcode');
 
         this.interactions.register(this.group, {
             onPointerEnter: () => this.onHover(true),
@@ -257,6 +265,10 @@ export default class Printer {
 
     animatePrintHead() {
         if (!this.printHead) return;
+        if (this.gcodeSegments.length > 0 && this.gcodeTotalDuration > 0) {
+            this.animateGcodePath();
+            return;
+        }
         const elapsed = (this.time.elapsed * this.animationSpeed) % 1;
         const segment = Math.floor(elapsed * PRINT_HEAD_PATH_STEPS);
         const segmentProgress = elapsed * PRINT_HEAD_PATH_STEPS - segment;
@@ -290,4 +302,171 @@ export default class Printer {
         this.skirtMaterial.emissiveIntensity = intensity;
         this.neonMaterial.emissiveIntensity = 1.2 + Math.sin(this.time.elapsed * 0.004) * 0.3;
     }
+
+    async loadGcodeProgram(path: string) {
+        try {
+            const response = await fetch(path);
+            if (!response.ok) return;
+            const text = await response.text();
+            const segments = this.parseGcode(text);
+            if (segments.length === 0) return;
+            this.normalizeGcodeSegments(segments);
+            this.gcodeSegments = segments;
+            const last = segments[segments.length - 1];
+            this.gcodeTotalDuration = last.cumulative + last.duration;
+            this.gcodeLoopStart = this.time.elapsed;
+        } catch (error) {
+            console.warn('Failed to load gcode program', error);
+        }
+    }
+
+    parseGcode(text: string): GcodeSegment[] {
+        const lines = text.split(/\r?\n/);
+        const segments: GcodeSegment[] = [];
+        let current = new THREE.Vector3();
+        let cumulative = 0;
+        let absolute = true;
+        let extruderAbsolute = true;
+        let lastExtrude = 0;
+
+        for (const rawLine of lines) {
+            const line = rawLine.split(';')[0].trim();
+            if (!line) continue;
+
+            if (line.startsWith('G90')) absolute = true;
+            if (line.startsWith('G91')) absolute = false;
+            if (line.startsWith('M82')) extruderAbsolute = true;
+            if (line.startsWith('M83')) extruderAbsolute = false;
+
+            if (!/^G0?1/.test(line)) continue;
+
+            const tokens = line.split(/\s+/);
+            const next = current.clone();
+            let hasMove = false;
+            let feed = 1200;
+            let extruding = false;
+            let eValue = 0;
+
+            for (const token of tokens) {
+                const axis = token[0]?.toUpperCase();
+                const value = parseFloat(token.slice(1));
+                if (Number.isNaN(value)) continue;
+                switch (axis) {
+                    case 'X':
+                        if (absolute) next.x = value;
+                        else next.x += value;
+                        hasMove = true;
+                        break;
+                    case 'Y':
+                        if (absolute) next.y = value;
+                        else next.y += value;
+                        hasMove = true;
+                        break;
+                    case 'Z':
+                        if (absolute) next.z = value;
+                        else next.z += value;
+                        hasMove = true;
+                        break;
+                    case 'E':
+                        eValue = extruderAbsolute ? value : lastExtrude + value;
+                        extruding = eValue > lastExtrude;
+                        break;
+                    case 'F':
+                        feed = value;
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            if (!hasMove || next.equals(current)) {
+                lastExtrude = eValue;
+                continue;
+            }
+
+            const distance = next.distanceTo(current);
+            const duration = Math.max((distance / (feed || 1200)) * 60000, 1);
+
+            segments.push({
+                start: current.clone(),
+                end: next.clone(),
+                duration,
+                cumulative,
+                extruding,
+            });
+
+            cumulative += duration;
+            current.copy(next);
+            lastExtrude = eValue;
+        }
+
+        return segments;
+    }
+
+    normalizeGcodeSegments(segments: GcodeSegment[]) {
+        const bounds = new THREE.Box3();
+        segments.forEach((segment) => {
+            bounds.expandByPoint(segment.start);
+            bounds.expandByPoint(segment.end);
+        });
+
+        const size = bounds.getSize(new THREE.Vector3(1, 1, 1));
+        const center = bounds.getCenter(new THREE.Vector3());
+        const availableWidth = this.printArea.width * 0.9;
+        const availableDepth = this.printArea.depth * 0.9;
+        const availableHeight = this.printArea.height * 0.5;
+        const scale = Math.min(
+            availableWidth / (size.x || 1),
+            availableDepth / (size.y || 1),
+            availableHeight / (size.z || 1)
+        );
+        const baseHeight = this.printArea.height;
+
+        segments.forEach((segment) => {
+            segment.start.sub(center).multiplyScalar(scale);
+            segment.end.sub(center).multiplyScalar(scale);
+            const startZ = segment.start.z;
+            const endZ = segment.end.z;
+            segment.start.set(
+                segment.start.x,
+                baseHeight + startZ,
+                segment.start.y
+            );
+            segment.end.set(segment.end.x, baseHeight + endZ, segment.end.y);
+        });
+    }
+
+    animateGcodePath() {
+        if (!this.printHead || !this.gcodeSegments.length) return;
+        const elapsed = ((this.time.elapsed - this.gcodeLoopStart) % this.gcodeTotalDuration + this.gcodeTotalDuration) % this.gcodeTotalDuration;
+        let segment = this.gcodeSegments[this.gcodeSegments.length - 1];
+        for (const candidate of this.gcodeSegments) {
+            if (elapsed >= candidate.cumulative && elapsed < candidate.cumulative + candidate.duration) {
+                segment = candidate;
+                break;
+            }
+        }
+
+        const localTime = (elapsed - segment.cumulative) / segment.duration;
+        this.printHead.position.copy(segment.start).lerp(segment.end, THREE.MathUtils.clamp(localTime, 0, 1));
+        this.printHead.rotation.y = Math.atan2(
+            segment.end.x - segment.start.x,
+            segment.end.z - segment.start.z
+        );
+
+        const intensity = segment.extruding ? 1.35 : 0.4;
+        this.neonMaterial.emissiveIntensity = THREE.MathUtils.lerp(
+            this.neonMaterial.emissiveIntensity,
+            intensity,
+            0.15
+        );
+    }
 }
+
+type GcodeSegment = {
+    start: THREE.Vector3;
+    end: THREE.Vector3;
+    duration: number;
+    cumulative: number;
+    extruding: boolean;
+};
