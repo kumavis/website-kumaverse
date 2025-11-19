@@ -34,6 +34,7 @@ export default class Printer {
     gcodeSegments: GcodeSegment[];
     gcodeTotalDuration: number;
     gcodeLoopStart: number;
+    squareDemoGcode: string;
 
     constructor() {
         this.application = new Application();
@@ -77,6 +78,18 @@ export default class Printer {
         this.gcodeSegments = [];
         this.gcodeTotalDuration = 0;
         this.gcodeLoopStart = 0;
+        this.squareDemoGcode = `
+; simple square demo
+G21
+G90
+M82
+G1 Z0.2 F1200
+G1 X0 Y0 F1800
+G1 X40 Y0 E0.5
+G1 X40 Y40 E1.0
+G1 X0 Y40 E1.5
+G1 X0 Y0 E2.0
+`;
 
         this.resources.on('ready', () => {
             this.buildPrinter();
@@ -100,8 +113,6 @@ export default class Printer {
         this.group.scale.setScalar(0.45);
         this.group.position.set(520, 460, -300);
         this.group.rotation.y = THREE.MathUtils.degToRad(28);
-
-        this.loadGcodeProgram('gcode/stray-demo.gcode');
 
         this.interactions.register(this.group, {
             onPointerEnter: () => this.onHover(true),
@@ -253,7 +264,11 @@ export default class Printer {
     }
 
     onClick() {
-        this.animationSpeed = this.animationSpeed === 0.00005 ? 0.00012 : 0.00005;
+        if (!this.gcodeSegments.length) {
+            this.startSquareProgram();
+            return;
+        }
+        this.gcodeLoopStart = this.time.elapsed;
     }
 
     update() {
@@ -303,21 +318,14 @@ export default class Printer {
         this.neonMaterial.emissiveIntensity = 1.2 + Math.sin(this.time.elapsed * 0.004) * 0.3;
     }
 
-    async loadGcodeProgram(path: string) {
-        try {
-            const response = await fetch(path);
-            if (!response.ok) return;
-            const text = await response.text();
-            const segments = this.parseGcode(text);
-            if (segments.length === 0) return;
-            this.normalizeGcodeSegments(segments);
-            this.gcodeSegments = segments;
-            const last = segments[segments.length - 1];
-            this.gcodeTotalDuration = last.cumulative + last.duration;
-            this.gcodeLoopStart = this.time.elapsed;
-        } catch (error) {
-            console.warn('Failed to load gcode program', error);
-        }
+    startSquareProgram() {
+        const segments = this.parseGcode(this.squareDemoGcode);
+        if (!segments.length) return;
+        this.normalizeGcodeSegments(segments);
+        this.gcodeSegments = segments;
+        const last = segments[segments.length - 1];
+        this.gcodeTotalDuration = last.cumulative + last.duration;
+        this.gcodeLoopStart = this.time.elapsed;
     }
 
     parseGcode(text: string): GcodeSegment[] {
